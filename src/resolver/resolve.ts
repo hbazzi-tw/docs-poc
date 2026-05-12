@@ -74,7 +74,7 @@ export function resolveTemplate(
   const resolveNode = (node: PMNode, scope: Bindings, depth: number): PMNode[] => {
     switch (node.type) {
       case 'variable_ref': {
-        return [resolveVariable(node, scope, warnings)];
+        return resolveVariable(node, scope, warnings);
       }
       case 'defined_term': {
         // Always 0..N inline nodes — usually 1 text node, occasionally
@@ -167,7 +167,9 @@ export function resolveTemplate(
     const out: PMInlineNode[] = [];
     for (const n of nodes) {
       if (n.type === 'variable_ref') {
-        out.push(resolveVariable(n, scope, warnings) as PMInlineNode);
+        for (const r of resolveVariable(n, scope, warnings)) {
+          out.push(r as PMInlineNode);
+        }
       } else if (n.type === 'defined_term') {
         for (const r of resolveDefinedTerm(n, scope, warnings)) {
           out.push(r as PMInlineNode);
@@ -199,7 +201,8 @@ function resolveDefinedTerm(node: PMDefinedTerm, scope: Bindings, warnings: stri
   const stateName = resolvePath('testator.state', scope) as string | undefined;
   const override = lookupTerm(node.attrs.term, stateName);
   if (override !== null) {
-    return [{ type: 'text', text: override }];
+    // PM disallows empty text nodes — emit nothing for an explicit blank override.
+    return override === '' ? [] : [{ type: 'text', text: override }];
   }
   if (node.attrs.defaultText) {
     return [{ type: 'text', text: node.attrs.defaultText }];
@@ -208,7 +211,7 @@ function resolveDefinedTerm(node: PMDefinedTerm, scope: Bindings, warnings: stri
   return [{ type: 'text', text: `[${node.attrs.term}]` }];
 }
 
-function resolveVariable(node: PMVariableRef, scope: Bindings, warnings: string[]): PMTextNode {
+function resolveVariable(node: PMVariableRef, scope: Bindings, warnings: string[]): PMInlineNode[] {
   const raw = resolvePath(node.attrs.path, scope);
   let val: string;
   // Empty string is a valid binding value (e.g. settlor_plural='' for a
@@ -228,7 +231,10 @@ function resolveVariable(node: PMVariableRef, scope: Bindings, warnings: string[
     case 'lower': val = val.toLowerCase(); break;
     case 'title': val = val.replace(/\w\S*/g, w => w[0].toUpperCase() + w.slice(1).toLowerCase()); break;
   }
-  return { type: 'text', text: val };
+  // ProseMirror disallows empty text nodes — Tiptap's setContent rejects the
+  // entire doc if one is present, which manifests as a blank editor in the
+  // review stage. Emit nothing for an empty resolved value.
+  return val === '' ? [] : [{ type: 'text', text: val }];
 }
 
 export function isResolved(doc: PMDoc): boolean {

@@ -12,7 +12,7 @@ const K_TEMPLATES = 'tw-poc.templates';
 const K_CLAUSES = 'tw-poc.clauses';
 // Bump this key whenever new templates/clauses get added to the seed so
 // existing localStorage caches automatically pick them up.
-const K_SEEDED = 'tw-poc.seeded.v11';
+const K_SEEDED = 'tw-poc.seeded.v12';
 
 function read<T>(key: string, fallback: T): T {
   try {
