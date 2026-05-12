@@ -127,7 +127,7 @@ function ClauseRefNodeView({ node, updateAttributes, editor }: NodeViewProps) {
               <div className="pm-clause-preview-footer">
                 <span>Click card to change reference</span>
                 <a
-                  href={`/clauses/${clause.id}/${clause.version}`}
+                  href={`${import.meta.env.BASE_URL}clauses/${clause.id}/${clause.version}`}
                   onClick={(e) => e.stopPropagation()}
                   style={{ marginLeft: 'auto' }}
                 >
