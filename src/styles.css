@@ -291,11 +291,16 @@ h3 { font-size: 16px; margin: 0 0 8px 0; }
   color: var(--ink);
 }
 .ProseMirror.doc-style p {
-  margin: 0 0 0.85em 18px;
+  margin: 0 0 0.85em 0;
   text-align: left;
 }
-.ProseMirror.doc-style > p:first-of-type {
-  margin-left: 0;
+/* Section body indent: any paragraph that comes after a section heading
+   (h2 or h3) indents under it. Paragraphs that precede the first heading
+   — the opening declaration plus any lead paragraphs the attorney adds —
+   stay flush at the margin. Mirrors the pdf-kit Will layout. */
+.ProseMirror.doc-style > h2 ~ p,
+.ProseMirror.doc-style > h3 ~ p {
+  margin-left: 18px;
 }
 .ProseMirror.doc-style ul,
 .ProseMirror.doc-style ol {
@@ -687,16 +692,18 @@ h3 { font-size: 16px; margin: 0 0 8px 0; }
   break-after: avoid;
 }
 .doc-preview p {
-  margin: 0 0 0.85em 18px;     /* body paragraphs indent under section headers */
+  margin: 0 0 0.85em 0;
   text-align: left;
   orphans: 3;
   widows: 3;
 }
-/* The opening declaration paragraph (first paragraph in the document) sits
-   flush with the title — mirrors the pdf-kit "I, [name], being of sound
-   mind..." block on Will page 2 which is at the page margin, not indented. */
-.doc-preview > p:first-of-type {
-  margin-left: 0;
+/* Paragraphs before the first section heading sit flush at the page margin
+   (opening "I, [name], being of sound mind..." declaration + any lead
+   paragraphs the attorney inserts there). Once an h2/h3 appears, the
+   remaining body paragraphs indent under their section header. */
+.doc-preview > h2 ~ p,
+.doc-preview > h3 ~ p {
+  margin-left: 18px;
 }
 .doc-preview ul,
 .doc-preview ol {
@@ -1008,7 +1015,8 @@ h3 { font-size: 16px; margin: 0 0 8px 0; }
   .ProseMirror.doc-style h1 { font-size: 26px; margin-bottom: 20px; }
   .ProseMirror.doc-style h2 { font-size: 18px; margin: 18px 0 10px; }
   .ProseMirror.doc-style h3 { font-size: 13px; margin: 12px 0 6px 10px; }
-  .ProseMirror.doc-style p { margin-left: 10px; }
+  .ProseMirror.doc-style > h2 ~ p,
+  .ProseMirror.doc-style > h3 ~ p { margin-left: 10px; }
   .ProseMirror.doc-style ul,
   .ProseMirror.doc-style ol { margin-left: 24px; padding-left: 12px; }
 
@@ -1022,7 +1030,8 @@ h3 { font-size: 16px; margin: 0 0 8px 0; }
   .doc-preview h1 { font-size: 26px; margin-bottom: 20px; }
   .doc-preview h2 { font-size: 18px; margin: 18px 0 10px; }
   .doc-preview h3 { font-size: 13px; margin: 12px 0 6px 10px; }
-  .doc-preview p { margin-left: 10px; }
+  .doc-preview > h2 ~ p,
+  .doc-preview > h3 ~ p { margin-left: 10px; }
   .doc-preview ul,
   .doc-preview ol { margin-left: 24px; padding-left: 12px; }
 
