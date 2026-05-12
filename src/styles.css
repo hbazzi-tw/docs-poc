@@ -959,3 +959,118 @@ h3 { font-size: 16px; margin: 0 0 8px 0; }
   padding: 60px 20px;
   color: var(--ink-2);
 }
+
+/* ---------- Mobile / responsive ----------
+   Targets phones + small tablets. Print rules above still take precedence
+   inside @media print. The doc-preview/ProseMirror.doc-style surfaces here
+   shed their 1in US-Letter margins so the document remains readable on a
+   phone screen — print output stays unaffected because the print block
+   resets padding to 0 anyway. */
+@media (max-width: 768px) {
+  body { font-size: 13px; }
+
+  .topbar {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px 12px;
+  }
+  .topbar h1 { font-size: 14px; flex: 1 1 auto; }
+  .topbar nav {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .topbar nav a { padding: 4px 8px; font-size: 12px; }
+
+  .main { padding: 12px; }
+  .container { max-width: 100%; }
+
+  h2 { font-size: 17px; }
+  h3 { font-size: 14px; }
+
+  .grid-2 { grid-template-columns: 1fr; gap: 12px; }
+  .split { grid-template-columns: 1fr; gap: 12px; }
+  .split-3 {
+    grid-template-columns: 1fr;
+    height: auto;
+    gap: 12px;
+  }
+  .split-3 > * { overflow: visible; height: auto; }
+
+  .row { flex-wrap: wrap; }
+  .card { padding: 12px; }
+
+  .editor-toolbar { padding: 6px 8px; gap: 4px; }
+  .editor-toolbar button { padding: 4px 6px; font-size: 11px; }
+
+  .ProseMirror { padding: 16px; }
+  .ProseMirror.doc-style { padding: 32px 20px; min-height: 480px; }
+  .ProseMirror.doc-style h1 { font-size: 26px; margin-bottom: 20px; }
+  .ProseMirror.doc-style h2 { font-size: 18px; margin: 18px 0 10px; }
+  .ProseMirror.doc-style h3 { font-size: 13px; margin: 12px 0 6px 10px; }
+  .ProseMirror.doc-style p { margin-left: 10px; }
+  .ProseMirror.doc-style ul,
+  .ProseMirror.doc-style ol { margin-left: 24px; padding-left: 12px; }
+
+  .doc-editor-wrap { max-width: 100%; }
+  .doc-preview {
+    padding: 32px 20px;
+    border-radius: 4px;
+    font-size: 12.5px;
+    max-width: 100%;
+  }
+  .doc-preview h1 { font-size: 26px; margin-bottom: 20px; }
+  .doc-preview h2 { font-size: 18px; margin: 18px 0 10px; }
+  .doc-preview h3 { font-size: 13px; margin: 12px 0 6px 10px; }
+  .doc-preview p { margin-left: 10px; }
+  .doc-preview ul,
+  .doc-preview ol { margin-left: 24px; padding-left: 12px; }
+
+  /* Two-col signature layouts stack on phones */
+  .doc-preview .sig-two-col { grid-template-columns: 1fr; gap: 4px; }
+  .doc-preview .witness-grid .witness-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+  .doc-preview .sig-label-right {
+    align-self: flex-start;
+    text-align: left;
+  }
+
+  /* Popovers — clamp to viewport so they don't overflow the screen edge. */
+  .slash-palette {
+    width: calc(100vw - 24px);
+    max-width: 480px;
+    max-height: 60vh;
+  }
+  .defined-term-popover {
+    width: calc(100vw - 24px);
+    max-width: 380px;
+    max-height: 70vh;
+  }
+  .pm-clause-preview {
+    width: calc(100vw - 32px);
+    min-width: 0;
+    max-width: calc(100vw - 32px);
+    max-height: 60vh;
+  }
+
+  .list-item {
+    flex-wrap: wrap;
+    padding: 10px 12px;
+    gap: 8px;
+  }
+  .list-item .meta { font-size: 11px; width: 100%; }
+
+  /* 16px input font prevents iOS Safari auto-zoom on focus. */
+  input, select, textarea { font-size: 16px; }
+}
+
+@media (max-width: 480px) {
+  .ProseMirror.doc-style { padding: 24px 14px; }
+  .doc-preview { padding: 24px 14px; }
+  .doc-preview h1,
+  .ProseMirror.doc-style h1 { font-size: 22px; }
+  .topbar { padding: 8px 10px; gap: 6px; }
+  .main { padding: 10px; }
+}
