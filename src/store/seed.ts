@@ -39,7 +39,10 @@ function h(level: 1 | 2 | 3, ...inline: any[]): any {
   return { type: 'heading', attrs: { level }, content: inline };
 }
 function vref(path: string, fallback?: string): any {
-  return { type: 'variable_ref', attrs: { path, fallback: fallback ?? '', transform: null } };
+  // Preserve undefined fallback (vs coercing to '') so the resolver can
+  // distinguish "no fallback specified — warn if binding missing" from
+  // "fallback is explicitly empty — silent rendering of empty string".
+  return { type: 'variable_ref', attrs: { path, fallback, transform: null } };
 }
 function cref(clauseId: string, version: string = 'latest'): any {
   return { type: 'clause_ref', attrs: { clauseId, version, pinned: version !== 'latest' } };

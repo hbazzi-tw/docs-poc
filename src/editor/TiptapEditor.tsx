@@ -63,6 +63,14 @@ export function TiptapEditor({ initialDoc, onChange, mode, editable = true, docS
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialDoc, editor]);
 
+  // useEditor snapshots `editable` at mount and never re-reads it. Without
+  // this, forking a published (read-only) clause to a draft leaves the
+  // editor in read-only mode even after the route swaps to the new draft.
+  useEffect(() => {
+    if (!editor) return;
+    if (editor.isEditable !== editable) editor.setEditable(editable);
+  }, [editable, editor]);
+
   if (!editor) return null;
 
   return (

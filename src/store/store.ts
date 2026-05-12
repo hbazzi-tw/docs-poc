@@ -67,8 +67,14 @@ export function getClause(id: string, version?: string): Clause | undefined {
   const clauses = getClauses().filter(c => c.id === id);
   if (clauses.length === 0) return undefined;
   if (!version || version === 'latest') {
-    // sort by semver desc — POC: lexical sort is good enough for x.y.z
-    return clauses.sort((a, b) => b.version.localeCompare(a.version))[0];
+    // `latest` means latest PUBLISHED — drafts are explicitly ignored so a
+    // half-finished fork doesn't quietly take over document generation.
+    // Returns undefined if no published version exists yet; the resolver
+    // surfaces that as a "Missing clause" warning, which is the right
+    // signal (referencing `latest` of a never-published clause is broken).
+    return clauses
+      .filter(c => c.status === 'published')
+      .sort((a, b) => b.version.localeCompare(a.version))[0];
   }
   return clauses.find(c => c.version === version);
 }

@@ -211,9 +211,15 @@ function resolveDefinedTerm(node: PMDefinedTerm, scope: Bindings, warnings: stri
 function resolveVariable(node: PMVariableRef, scope: Bindings, warnings: string[]): PMTextNode {
   const raw = resolvePath(node.attrs.path, scope);
   let val: string;
-  if (raw === undefined || raw === null || raw === '') {
+  // Empty string is a valid binding value (e.g. settlor_plural='' for a
+  // single-settlor trust → "Settlor" not "Settlors"). Only undefined/null
+  // count as missing. And only warn when the template provided no fallback
+  // at all — an explicit fallback of '' means the author chose empty.
+  if (raw === undefined || raw === null) {
     val = node.attrs.fallback ?? '';
-    if (!node.attrs.fallback) warnings.push(`Missing binding: ${node.attrs.path}`);
+    if (node.attrs.fallback === undefined || node.attrs.fallback === null) {
+      warnings.push(`Missing binding: ${node.attrs.path}`);
+    }
   } else {
     val = String(raw);
   }
