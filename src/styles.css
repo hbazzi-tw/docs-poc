@@ -465,25 +465,84 @@ h3 { font-size: 16px; margin: 0 0 8px 0; }
   gap: 8px;
 }
 
-/* clause_ref block card */
+/* clause_ref block card — outer container for the inline node view */
 .pm-clause-ref {
   display: block;
   margin: 8px 0;
-  padding: 8px 12px;
   background: #f7f5ef;
   border-left: 3px solid #a07d2c;
   border-radius: 4px;
   font-family: var(--sans);
   font-size: 12px;
   color: #5a4717;
-  cursor: pointer;
-  user-select: none;
-  position: relative;       /* anchor for .pm-clause-preview */
+  user-select: text;
+  position: relative;
 }
-.pm-clause-ref:hover { background: #f1ecdd; }
 .pm-clause-ref .lbl { font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-size: 10px; }
 .pm-clause-ref .id { font-family: var(--mono); }
 .pm-clause-ref .ver { color: var(--ink-2); margin-left: 6px; }
+
+/* Inline header bar — name, version, status, action buttons */
+.pm-clause-ref-inline .pm-clause-inline-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: #efeadb;
+  border-bottom: 1px solid #d8cfb3;
+  border-top-right-radius: 4px;
+}
+.pm-clause-ref-inline .pm-clause-inline-header button {
+  font-size: 11px;
+  padding: 2px 8px;
+}
+
+/* Inline rendered clause body (read-only) — uses the doc-preview renderer */
+.pm-clause-ref-inline .pm-clause-inline-body {
+  padding: 6px 12px 10px;
+  background: #fbfaf5;
+  font-family: var(--serif, Georgia, serif);
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.55;
+}
+.pm-clause-ref-inline .pm-clause-inline-body .doc-preview {
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  margin: 0;
+  max-width: none;
+  font-size: 13px;
+  line-height: 1.55;
+  background: transparent;
+}
+.pm-clause-ref-inline .pm-clause-inline-body .doc-preview h1,
+.pm-clause-ref-inline .pm-clause-inline-body .doc-preview h2,
+.pm-clause-ref-inline .pm-clause-inline-body .doc-preview h3 {
+  font-size: 13px;
+  margin: 6px 0 4px;
+}
+.pm-clause-ref-inline .pm-clause-inline-body .doc-preview ol,
+.pm-clause-ref-inline .pm-clause-inline-body .doc-preview ul {
+  margin: 4px 0 8px 16px;
+  padding-left: 18px;
+}
+.pm-clause-ref-inline .pm-clause-inline-body .doc-preview ol { list-style-type: decimal; }
+.pm-clause-ref-inline .pm-clause-inline-body .doc-preview ul { list-style-type: disc; }
+.pm-clause-ref-inline .pm-clause-inline-body .doc-preview li::marker { color: var(--accent); font-weight: 600; }
+
+/* Nested editor when in inline-edit mode */
+.pm-clause-ref-inline .pm-clause-inline-edit {
+  background: white;
+  padding: 0;
+  border-top: 1px dashed #d8cfb3;
+}
+.pm-clause-ref-inline .pm-clause-inline-edit .editor-shell {
+  border: none;
+  box-shadow: none;
+  margin: 0;
+  border-radius: 0;
+}
 
 /* clause hover preview popover */
 .pm-clause-preview {

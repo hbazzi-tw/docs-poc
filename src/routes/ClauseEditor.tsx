@@ -1,8 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { TiptapEditor } from '../editor/TiptapEditor';
-import { getClause, getClauses, saveClause, deleteClause } from '../store/store';
-import type { Clause } from '../types';
+import { getClause, getClauses, saveClause, deleteClause, forkClause } from '../store/store';
 
 export function ClauseEditor() {
   const { id, version } = useParams<{ id: string; version: string }>();
@@ -49,37 +48,18 @@ export function ClauseEditor() {
       .sort((a, b) => b.version.localeCompare(a.version));
   }, [clause?.id, clause?.version, clause?.updatedAt]);
 
-  // Fork creates a new draft version. Bumps the minor segment, sets
-  // status='draft', deep-clones the AST so edits to the fork don't bleed
-  // into the source. Source clause stays untouched — existing pinned
-  // clause_refs continue to resolve to it.
-  //
-  // Uses live getClauses() (not the memoized allVersions) so any drafts
-  // created in another tab or by an earlier fork action are included in
-  // the bump calculation. Then sanity-checks that the save actually
-  // landed — saveClause silently no-ops if the target version already
-  // exists as published (per the immutability rule), and we want a
-  // visible failure rather than silently navigating to a frozen one.
+  // Fork creates a new draft version. Source clause stays untouched —
+  // existing pinned clause_refs continue to resolve to it. Floating
+  // `latest` refs keep resolving to the previous published version until
+  // the new draft is promoted to published.
   const fork = () => {
     if (!clause) return;
-    const liveVersions = getClauses().filter(c => c.id === clause.id).map(c => c.version);
-    const nextVersion = bumpVersion(clause.version, liveVersions);
-    const next: Clause = {
-      ...clause,
-      version: nextVersion,
-      status: 'draft',
-      ast: JSON.parse(JSON.stringify(clause.ast)),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    saveClause(next);
-    const saved = getClause(next.id, next.version);
-    if (!saved || saved.status !== 'draft') {
+    const next = forkClause(clause);
+    if (!next) {
       alert(
-        `Couldn't create fork — v${next.version} already exists in the store as ` +
-        `${saved?.status ?? 'unknown'}. This usually means a previously-published ` +
-        `version of this clause is blocking the new draft. Use the topbar "↻ reset seed" ` +
-        `to start fresh, or delete the conflicting version.`
+        `Couldn't create fork — the bumped version slot is already taken by a ` +
+        `published clause. Use the topbar "↻ reset seed" to start fresh, or ` +
+        `delete the conflicting version.`
       );
       return;
     }
@@ -267,26 +247,3 @@ export function ClauseEditor() {
   );
 }
 
-// Bump the patch segment of a semver-ish version string. If `existing`
-// already has the bumped version (e.g. user has forked before), keeps
-// incrementing the patch until a free slot is found.
-function bumpVersion(current: string, existing: string[]): string {
-  // Parse "x.y.z" — fall back to appending "-draft.N" if the format is
-  // unexpected. Accept already-suffixed inputs like "1.0.0-draft.1" by
-  // dropping the suffix and bumping the patch from the base.
-  const base = current.split('-')[0];
-  const segments = base.split('.').map(s => parseInt(s, 10));
-  if (segments.length !== 3 || segments.some(n => isNaN(n))) {
-    return `${current}-draft.${Date.now()}`;
-  }
-  const taken = new Set(existing);
-  let [maj, min, patch] = segments;
-  // Default: bump minor (e.g. 1.0.0 → 1.1.0); fall back to patch bumps
-  // if that's taken.
-  let next = `${maj}.${min + 1}.0`;
-  while (taken.has(next)) {
-    patch += 1;
-    next = `${maj}.${min + 1}.${patch}`;
-  }
-  return next;
-}

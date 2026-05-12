@@ -107,6 +107,46 @@ export function deleteClause(id: string, version: string) {
   write(K_CLAUSES, getClauses().filter(c => !(c.id === id && c.version === version)));
 }
 
+// Bump the minor segment of a semver-ish version, falling back to patch
+// bumps to avoid colliding with anything already in `existing`. Shared
+// between the ClauseEditor's "Fork as new draft" button and inline forking
+// from clause_ref NodeViews in the template editor.
+export function bumpClauseVersion(current: string, existing: string[]): string {
+  const base = current.split('-')[0];
+  const segments = base.split('.').map(s => parseInt(s, 10));
+  if (segments.length !== 3 || segments.some(n => isNaN(n))) {
+    return `${current}-draft.${Date.now()}`;
+  }
+  const taken = new Set(existing);
+  let [maj, min, patch] = segments;
+  let next = `${maj}.${min + 1}.0`;
+  while (taken.has(next)) {
+    patch += 1;
+    next = `${maj}.${min + 1}.${patch}`;
+  }
+  return next;
+}
+
+// Create a draft fork of `clause` and persist it. Returns the saved fork
+// or null if the bumped version slot turned out to already exist as
+// published (saveClause's frozen-write guard refuses the write).
+export function forkClause(clause: Clause): Clause | null {
+  const liveVersions = getClauses().filter(c => c.id === clause.id).map(c => c.version);
+  const nextVersion = bumpClauseVersion(clause.version, liveVersions);
+  const next: Clause = {
+    ...clause,
+    version: nextVersion,
+    status: 'draft',
+    ast: JSON.parse(JSON.stringify(clause.ast)),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  saveClause(next);
+  const saved = getClause(next.id, next.version);
+  if (!saved || saved.status !== 'draft') return null;
+  return saved;
+}
+
 export function resetStore() {
   localStorage.removeItem(K_TEMPLATES);
   localStorage.removeItem(K_CLAUSES);
